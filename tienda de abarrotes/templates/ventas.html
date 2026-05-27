@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<style>
+    .clay-container {
+        background: white;
+        border-radius: 30px;
+        padding: 25px;
+        box-shadow: 15px 15px 40px #d1d9e6, -15px -15px 40px #ffffff;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-clay {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+        transition: 0.2s;
+    }
+    .btn-clay:active {
+        box-shadow: inset 4px 4px 10px #bebebe, inset -4px -4px 10px #ffffff;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="clay-container">
+            <h3 class="mb-4">🛒 Añadir Artículos</h3>
+            <form method="POST" action="/agregar_al_carrito">
+                <div class="mb-3">
+                    <label class="form-label">Producto</label>
+                    <select name="producto_id" class="form-select" style="border-radius: 12px;">
+                        {% for p in productos %}
+                        <option value="{{ p[0] }}">
+                            {{ p[1] }} - ${{ p[2] }} (Stock: {{ p[3] }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cantidad</label>
+                    <input type="number" name="cantidad" class="form-control" value="1" min="1" required style="border-radius: 12px;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-clay w-100 py-2">Agregar al Carrito</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="clay-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mb-0">📋 Ticket Actual</h3>
+                <a href="/vaciar_carrito" class="btn btn-outline-danger btn-sm" style="border-radius: 10px;">Vaciar</a>
+            </div>
+
+            <table class="table table-borderless">
+                <thead class="text-muted">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+              <tbody>
+    {% set total_carrito = namespace(valor=0) %}
+    {% set total_ahorrado = namespace(valor=0) %}
+
+    {% if session.get('carrito') %}
+        {% for item in session['carrito'] %}
+        <tr>
+            <td>
+                <span class="fw-bold">{{ item.nombre }}</span>
+                {% if item.descuento and item.descuento > 0 %}
+                    <br><small class="text-success fw-bold">⚡ ¡2x1 Aplicado! (Ahorraste ${{ item.descuento }})</small>
+                {% endif %}
+            </td>
+            <td class="align-middle">{{ item.cantidad }}</td>
+            <td class="align-middle">${{ item.subtotal }}</td>
+        </tr>
+        {# Sumamos el subtotal fuera del if para que cuente todos los productos #}
+        {% set total_carrito.valor = total_carrito.valor + item.subtotal %}
+        {% endfor %}
+    {% else %}
+        <tr>
+            <td colspan="3" class="text-center text-muted py-4">El carrito está vacío</td>
+        </tr>
+    {% endif %}
+</tbody>
+            </table>
+
+            {% if session.get('carrito') %}
+            <hr style="border-top: 2px dashed #ddd;">
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <h4>Total:</h4>
+                <h4 class="text-primary fw-bold">${{ total_carrito.valor }}</h4>
+            </div>
+            <form method="POST" action="/procesar_compra">
+                <button type="submit" class="btn btn-success btn-clay w-100 mt-3 py-3 fw-bold">
+                    FINALIZAR VENTA 💰
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

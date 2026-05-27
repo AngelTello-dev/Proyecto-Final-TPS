@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<h2>📊 Historial de ventas</h2>
+
+<table class="table table-bordered table-hover">
+    <tr class="table-dark">
+        <th>ID</th>
+        <th>Productos</th>
+        <th>Cantidad</th>
+        <th>Total</th>
+    </tr>
+
+    {% for v in ventas %}
+    <tr>
+        <td>{{ v[0] }}</td>
+        <td>{{ v[1] }}</td>
+        <td>{{ v[2] }}</td>
+        <td>${{ v[3] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="alert alert-success">
+    💰 Total vendido: <strong>${{ total }}</strong>
+</div>
+
+{% endblock %}
